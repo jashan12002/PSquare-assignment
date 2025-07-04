@@ -1,0 +1,928 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+button:hover {
+  border-color: #646cff;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+
+  a:hover {
+    color: #747bff;
+  }
+
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+.header-title {
+  font-size: 30px;
+  font-weight: 400;
+}
+
+/* Leaves Page Styles */
+.leaves-container {
+  width: 100%;
+}
+
+.leaves-content {
+  /* display: grid
+; */
+  display: flex;
+  /* grid-template-columns: 1fr 1fr; */
+  gap: 6px;
+  justify-content: space-around;
+}
+
+@media (max-width: 1024px) {
+  .leaves-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+.applied-leaves {
+  background-color: #fff;
+  border-radius: 8px;
+  margin-left: 3px;
+}
+
+.leave-calendar {
+  background-color: #fff;
+  border-radius: 21px;
+  box-shadow: var(--shadow);
+}
+
+.section-title {
+  color: #4a148c;
+  font-size: 18px;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+/* Calendar Styles */
+.calendar-container {
+  display: flex;
+  flex-direction: column;
+  padding-left: 6px;
+  gap: 16px;
+}
+
+.calendar-header {
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.calendar-title {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.calendar-nav {
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendar-nav:hover {
+  background-color: #f9fafb;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+
+  text-align: center;
+}
+
+.calendar-day {
+  padding: 8px;
+  border-radius: 4px;
+  position: relative;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendar-day.empty {
+  background: none;
+}
+
+.calendar-day.today {
+  background-color: #4a148c;
+  color: white;
+  font-weight: 500;
+}
+
+.calendar-day.has-leave {
+  position: relative;
+}
+
+.leave-indicator {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #4a148c;
+}
+
+/* Approved Leaves List */
+.approved-leaves {
+  margin-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 16px;
+}
+
+.approved-leaves h4 {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  color: #4a148c;
+}
+
+.approved-leaves-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.approved-leave-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.approved-leave-details {
+  flex: 1;
+}
+
+.approved-leave-name {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.approved-leave-position {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.approved-leave-date {
+  font-size: 12px;
+  color: #4b5563;
+}
+
+/* Status Badge Styles */
+.status-badge-container {
+  position: relative;
+  display: inline-block;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  background: none;
+  cursor: pointer;
+}
+
+.dropdown-icon {
+  margin-left: 4px;
+}
+
+.status-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10;
+  min-width: 120px;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  margin-top: 4px;
+}
+
+.status-option {
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.status-option:hover {
+  background-color: #f3f4f6;
+}
+
+.status-option.active {
+  font-weight: 500;
+}
+
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+/* Floating label form styles */
+.floating-label-group {
+  position: relative;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.floating-label-group input,
+.floating-label-group select,
+.floating-label-group textarea {
+  width: 100%;
+  height: 56px;
+  padding: 14px 16px;
+  font-size: 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  outline: none;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  background-color: white;
+  color: #333;
+}
+
+.floating-label-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.floating-label-group input:focus,
+.floating-label-group select:focus,
+.floating-label-group textarea:focus {
+  border-color: #a855f7;
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.1);
+}
+
+.floating-label-group label {
+  position: absolute;
+  left: 16px;
+  top: 18px;
+  color: #6b7280;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  pointer-events: none;
+  background-color: transparent;
+  padding: 0 4px;
+  z-index: 1;
+}
+
+.floating-label-group input:focus~label,
+.floating-label-group select:focus~label,
+.floating-label-group textarea:focus~label,
+.floating-label-group input:not(:placeholder-shown)~label,
+.floating-label-group select:not([value=""]):not([value="default"])~label,
+.floating-label-group textarea:not(:placeholder-shown)~label,
+.floating-label-group .resume-upload~label {
+  top: -8px;
+  left: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #a855f7;
+  background-color: white;
+  z-index: 3;
+  padding: 0 4px;
+}
+
+.floating-label-group input::placeholder,
+.floating-label-group select::placeholder,
+.floating-label-group textarea::placeholder {
+  color: transparent;
+}
+
+.floating-label-group .form-error {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* File upload styling */
+.resume-upload {
+  height: 56px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-color: white;
+  transition: all 0.2s ease;
+}
+
+.resume-upload:hover {
+  border-color: #a855f7;
+}
+
+.resume-input {
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.resume-upload-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  width: 100%;
+}
+
+/* Apply floating label styles to all modals */
+.modal-body .form-group {
+  position: relative;
+  /* margin-bottom: 16px; */
+}
+
+.modal-body .form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.modal-body .form-row .floating-label-group {
+  flex: 1;
+}
+
+/* Original form styles (keep these for backward compatibility) */
+.form-group label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-error {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.form-info {
+  color: #6b7280;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Modal Styles */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+
+
+/* Actions Menu */
+.actions-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.actions-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.actions-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 10;
+  min-width: 150px;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  margin-top: 4px;
+}
+
+.actions-item {
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.actions-item:hover {
+  background-color: #f3f4f6;
+}
+
+/* Employee Position Text */
+.employee-position {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+/* New Leave Modal Styles */
+.new-leave-modal {
+  max-width: 760px;
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.new-leave-modal .modal-header {
+  background-color: #4a148c;
+  color: white;
+  font-weight: 500;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: none;
+}
+
+.new-leave-modal .modal-title {
+  color: white;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.new-leave-modal .modal-close {
+  color: white;
+  font-size: 24px;
+  opacity: 0.8;
+}
+
+.new-leave-modal .modal-body {
+  padding: 24px;
+}
+
+.new-leave-modal .form-control {
+  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.new-leave-modal .form-group {
+  position: relative;
+  /* margin-bottom: 20px; */
+}
+
+.new-leave-modal .clear-input {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.new-leave-modal .form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.new-leave-modal .form-row .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+/* Date Picker Styles */
+.date-picker-container {
+  position: relative;
+}
+
+.date-input-wrapper {
+  position: relative;
+}
+
+.calendar-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.date-picker-calendar {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 100;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-top: 4px;
+  padding: 16px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.date-picker-calendar .calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.date-picker-calendar .calendar-title {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.date-picker-calendar .calendar-nav {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.date-picker-calendar .calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.date-picker-calendar .calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+}
+
+.date-picker-calendar .calendar-day {
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  height: 32px;
+  width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.date-picker-calendar .calendar-day:hover {
+  background-color: #f3f4f6;
+}
+
+.date-picker-calendar .calendar-day.empty {
+  background: none;
+  cursor: default;
+}
+
+.date-picker-calendar .calendar-day.today {
+  background-color: #f3f4f6;
+  font-weight: 500;
+}
+
+.date-picker-calendar .calendar-day.selected {
+  background-color: #4a148c;
+  color: white;
+  font-weight: 500;
+}
+
+/* Document Upload Styles */
+.document-upload {
+  position: relative;
+  width: 100%;
+}
+
+.document-input {
+  position: absolute;
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.document-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #6b7280;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s;
+}
+
+.document-label:hover {
+  border-color: #4a148c;
+}
+
+.document-label svg {
+  color: #4a148c;
+}
+
+.selected-file {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #4a148c;
+  background-color: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Employee Dropdown Styles */
+.employee-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 100;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-top: 4px;
+  width: 100%;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.employee-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.employee-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.employee-item:hover {
+  background-color: #f3f4f6;
+}
+
+.employee-info {
+  flex: 1;
+}
+
+.employee-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.employee-position {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.no-employees {
+  padding: 16px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Submit Button */
+.submit-btn {
+  background-color: #4a148c;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.submit-btn:hover {
+  background-color: #3b00b3;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  width: 260px;
+  height: 100vh;
+  background-color: #fff;
+  border-right: 1px solid #eaeaea;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+}
+
+.sidebar-logo {
+  padding: 0 20px 20px;
+}
+
+.sidebar-menu-title {
+  font-size: 12px;
+  color: #9ca3af;
+  padding: 16px 20px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+}
+
+.sidebar-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  color: #6b7280;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.sidebar-menu-item svg {
+  width: 20px;
+  height: 20px;
+}
+
+.sidebar-menu-item:hover {
+  color: #5B2E91;
+}
+
+.sidebar-menu-item.active {
+  color: #5B2E91;
+  position: relative;
+}
+
+.sidebar-menu-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 6px;
+  background-color: #5B2E91;
+  border-radius: 0 25px 25px 0;
+}
+
+/* Button styles */
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 8px 40px;
+  border-radius: 45px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}

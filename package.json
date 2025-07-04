@@ -1,0 +1,26 @@
+{
+  "name": "hrms-dashboard",
+  "version": "1.0.0",
+  "description": "HRMS Dashboard with MERN Stack",
+  "main": "index.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "server": "cd backend && npm run dev",
+    "client": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "keywords": [
+    "mern",
+    "react",
+    "node",
+    "express",
+    "mongodb",
+    "hrms"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^8.2.2",
+    "multer": "^2.0.1"
+  }
+}
