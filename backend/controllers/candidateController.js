@@ -114,10 +114,9 @@ const moveToEmployee = async (req, res) => {
       return res.status(400).json({ message: 'Only selected candidates can be moved to employees' });
     }
 
-
     const employeeExists = await Employee.findOne({ email: candidate.email });
     if (employeeExists) {
-      return res.status(400).json({ message: 'Employee with this email already exists' });
+      return res.status(200).json(employeeExists);
     }
 
     const employee = await Employee.create({
@@ -129,8 +128,6 @@ const moveToEmployee = async (req, res) => {
     });
 
     if (employee) {
-     
-      // await candidate.deleteOne();
       res.status(201).json(employee);
     } else {
       res.status(400).json({ message: 'Failed to create employee' });

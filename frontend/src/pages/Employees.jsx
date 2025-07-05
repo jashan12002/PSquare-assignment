@@ -163,7 +163,7 @@ const Employees = () => {
     
     const days = [];
     
-    // Empty days at the beginning of the month
+   
     for (let i = 0; i < firstDayOfMonth; i++) {
       days.push(
         <div 
@@ -179,7 +179,7 @@ const Employees = () => {
       );
     }
     
-    // Actual days of the month
+ 
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
       const isToday = new Date().toDateString() === date.toDateString();

@@ -144,13 +144,9 @@ const Candidates = () => {
     try {
       const newCandidate = await apiService.createCandidate(formData);
 
-
       if (newCandidate.status === 'Selected') {
         await apiService.moveToEmployee(newCandidate._id);
-
-        // alert('Candidate has been created and moved to Employees');
-
-        window.location.href = '/employees';
+        setCandidates([...candidates, newCandidate]);
       } else {
         setCandidates([...candidates, newCandidate]);
       }
@@ -178,14 +174,13 @@ const Candidates = () => {
     try {
       const updatedCandidate = await apiService.updateCandidateStatus(id, status);
 
-
       if (status === 'Selected') {
         await apiService.moveToEmployee(id);
-        setCandidates(candidates.filter((candidate) => candidate._id !== id));
-
-        // alert('Candidate has been moved to Employees');
-
-        window.location.href = '/employees';
+        setCandidates(
+          candidates.map((candidate) =>
+            candidate._id === id ? updatedCandidate : candidate
+          )
+        );
       } else {
         setCandidates(
           candidates.map((candidate) =>
@@ -203,7 +198,13 @@ const Candidates = () => {
   const handleHire = async (id) => {
     try {
       await apiService.moveToEmployee(id);
-      setCandidates(candidates.filter((candidate) => candidate._id !== id));
+      
+      const updatedCandidate = await apiService.updateCandidateStatus(id, 'Selected');
+      setCandidates(
+        candidates.map((candidate) =>
+          candidate._id === id ? updatedCandidate : candidate
+        )
+      );
     } catch (error) {
       console.error('Error hiring candidate:', error);
       setError('Failed to hire candidate. Please try again later.');

@@ -38,20 +38,22 @@ const Leaves = () => {
   });
   const [formErrors, setFormErrors] = useState({});
 
-  // Calendar state
+ 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const calendarRef = useRef(null);
   const datePickerRef = useRef(null);
 
-  // Dropdown state
-  const [showEmployeeDropdown, setShowEmployeeDropdown] = useState(false);
 
-  // Download state
+  const [showEmployeeDropdown, setShowEmployeeDropdown] = useState(false);
+  const [employeeSearchTerm, setEmployeeSearchTerm] = useState('');
+  const [filteredEmployees, setFilteredEmployees] = useState([]);
+
+  
   const [isDownloading, setIsDownloading] = useState(false);
 
-  // Fetch leave records, employees, and attendance
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -62,7 +64,7 @@ const Leaves = () => {
           apiService.getAttendance()
         ]);
 
-        // Filter employees who are present
+     
         const presentEmployeeIds = attendanceData
           .filter(record => record.status === 'Present')
           .map(record => record.employee?._id);
@@ -86,7 +88,6 @@ const Leaves = () => {
     fetchData();
   }, []);
 
-  // Filter leave records
   const filteredLeaves = leaves.filter((leave) => {
     const matchesStatus = filters.status === '' || leave.status === filters.status;
     const matchesSearch = filters.search === '' || 
@@ -98,7 +99,7 @@ const Leaves = () => {
     return matchesStatus && matchesSearch;
   });
 
-  // Handle filter change
+
   const handleFilterChange = (e) => {
     setFilters({
       ...filters,
@@ -106,15 +107,35 @@ const Leaves = () => {
     });
   };
 
-  // Handle form input change
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+
+    if (e.target.name === 'employeeName') {
+      setEmployeeSearchTerm(e.target.value);
+      filterEmployees(e.target.value);
+      if (!showEmployeeDropdown) {
+        setShowEmployeeDropdown(true);
+      }
+    }
   };
 
-  // Handle employee selection
+
+  const filterEmployees = (searchTerm) => {
+    if (!searchTerm.trim()) {
+      setFilteredEmployees(presentEmployees);
+      return;
+    }
+    
+    const filtered = presentEmployees.filter(employee => 
+      employee.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredEmployees(filtered);
+  };
+
+
   const handleEmployeeSelect = (employeeId, employeeName, employeePosition) => {
     setFormData({
       ...formData,
@@ -124,7 +145,6 @@ const Leaves = () => {
     });
   };
 
-  // Clear employee selection
   const clearEmployeeSelection = () => {
     setFormData({
       ...formData,
@@ -134,7 +154,6 @@ const Leaves = () => {
     });
   };
 
-  // Handle date selection
   const handleDateSelect = (date) => {
     const formattedDate = new Date(date).toISOString().split('T')[0];
     setFormData({
@@ -145,29 +164,26 @@ const Leaves = () => {
     setShowCalendar(false);
   };
 
-  // Toggle date picker calendar
   const toggleCalendar = () => {
     setShowCalendar(!showCalendar);
   };
 
-  // Toggle actions dropdown
   const toggleActions = (id) => {
     setCurrentLeave(currentLeave === id ? null : id);
   };
 
-  // Handle status change
+
   const handleStatusChange = async (id, status) => {
     try {
       const updatedLeave = await apiService.updateLeaveStatus(id, status);
 
-      // Update leaves list
+ 
       setLeaves(
         leaves.map((leave) =>
           leave._id === id ? { ...leave, status: updatedLeave.status } : leave
         )
       );
 
-      // Update approved leaves if status is Approved
       if (status === 'Approved') {
         setApprovedLeaves([...approvedLeaves, updatedLeave]);
       } else {
@@ -179,7 +195,6 @@ const Leaves = () => {
     }
   };
 
-  // Validate form
   const validateForm = () => {
     let errors = {};
     let isValid = true;
@@ -203,7 +218,6 @@ const Leaves = () => {
     return isValid;
   };
 
-  // Handle document upload
   const handleDocumentUpload = (e) => {
     if (e.target.files && e.target.files[0]) {
       setFormData({
@@ -213,7 +227,6 @@ const Leaves = () => {
     }
   };
 
-  // Handle document download
   const handleDocumentDownload = async (documentPath) => {
     if (!documentPath) return;
     
@@ -221,7 +234,7 @@ const Leaves = () => {
       setIsDownloading(true);
       console.log('Document path:', documentPath);
       
-      // Don't modify the path - let the service handle different formats
+      
       await apiService.downloadLeaveDocument(documentPath);
     } catch (error) {
       console.error('Error downloading document:', error);
@@ -231,7 +244,7 @@ const Leaves = () => {
     }
   };
 
-  // Handle form submission
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -240,11 +253,11 @@ const Leaves = () => {
     }
 
     try {
-      // Create FormData object for file upload
+     
       const leaveFormData = new FormData();
       leaveFormData.append('employee', formData.employee);
       leaveFormData.append('startDate', formData.leaveDate);
-      leaveFormData.append('endDate', formData.leaveDate); // Single day leave
+      leaveFormData.append('endDate', formData.leaveDate);
       leaveFormData.append('reason', formData.reason);
 
       if (formData.document) {
@@ -253,10 +266,10 @@ const Leaves = () => {
 
       const newLeave = await apiService.createLeave(leaveFormData);
 
-      // No need to find employee data as it's already populated in the response
+     
       setLeaves([...leaves, newLeave]);
 
-      // Reset form
+     
       setFormData({
         employee: '',
         employeeName: '',
@@ -273,7 +286,7 @@ const Leaves = () => {
     }
   };
 
-  // Calendar navigation
+ 
   const prevMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
     setSelectedCalendarDate(null);
@@ -284,7 +297,7 @@ const Leaves = () => {
     setSelectedCalendarDate(null);
   };
 
-  // Close calendar when clicking outside
+ 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (datePickerRef.current && !datePickerRef.current.contains(event.target)) {
@@ -298,6 +311,12 @@ const Leaves = () => {
     };
   }, []);
 
+  
+  useEffect(() => {
+    if (showEmployeeDropdown) {
+      setFilteredEmployees(presentEmployees);
+    }
+  }, [showEmployeeDropdown, presentEmployees]);
 
   const generateCalendarDays = (options = {}) => {
     const {
@@ -726,7 +745,8 @@ const Leaves = () => {
                         id="employeeName"
                         name="employeeName"
                         value={formData.employeeName || ''}
-                        placeholder="Jane Cooper"
+                        onChange={handleInputChange}
+                        placeholder="Search employee name..."
                         style={{
                           width: '100%',
                           padding: '14px 20px',
@@ -735,8 +755,7 @@ const Leaves = () => {
                           fontSize: '16px',
                           boxSizing: 'border-box'
                         }}
-                        readOnly
-                        onClick={() => setShowEmployeeDropdown(!showEmployeeDropdown)}
+                        onClick={() => setShowEmployeeDropdown(true)}
                         required
                       />
                       {formData.employeeName && (
@@ -774,11 +793,11 @@ const Leaves = () => {
                         marginTop: '5px',
                         boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
                       }}>
-                        {presentEmployees.length === 0 ? (
-                          <div className="no-employees" style={{ padding: '10px', textAlign: 'center', color: '#666' }}>No present employees available</div>
+                        {filteredEmployees.length === 0 ? (
+                          <div className="no-employees" style={{ padding: '10px', textAlign: 'center', color: '#666' }}>No matching employees found</div>
                         ) : (
                           <ul className="employee-list" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                            {presentEmployees.map((employee) => (
+                            {filteredEmployees.map((employee) => (
                               <li
                                 key={employee._id}
                                 className="employee-item"

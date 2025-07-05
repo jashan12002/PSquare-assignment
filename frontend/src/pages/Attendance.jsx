@@ -101,27 +101,38 @@ const Attendance = () => {
   
   const handleStatusChange = async (id, status) => {
     try {
-      
       const record = employeeAttendanceList.find(r => r._id === id);
       
       if (record && record.isNewRecord) {
-        
         const newAttendance = await apiService.createAttendance({
           employee: record.employee._id,
           date: new Date().toISOString().split('T')[0],
           status: status
         });
         
+        setAttendance(prevAttendance => [...prevAttendance, newAttendance]);
         
-        setAttendance([...attendance, newAttendance]);
+       
+        const updatedRecord = { ...record, status: status, isNewRecord: false };
+        const updatedList = employeeAttendanceList.map(r => 
+          r._id === id ? updatedRecord : r
+        );
+        setEmployees(prevEmployees => [...prevEmployees]); // Trigger re-render
       } else {
-        
         const updatedAttendance = await apiService.updateAttendance(id, status);
-        setAttendance(
-          attendance.map((record) =>
+        
+        setAttendance(prevAttendance =>
+          prevAttendance.map((record) =>
             record._id === id ? { ...record, status: updatedAttendance.status } : record
           )
         );
+        
+     
+        const updatedRecord = { ...record, status: status };
+        const updatedList = employeeAttendanceList.map(r => 
+          r._id === id ? updatedRecord : r
+        );
+        setEmployees(prevEmployees => [...prevEmployees]); // Trigger re-render
       }
     } catch (error) {
       console.error('Error updating attendance status:', error);
