@@ -67,7 +67,7 @@ const Register = () => {
       try {
         const { confirmPassword, ...registerData } = formData;
         await register(registerData);
-        navigate('/candidates');
+        navigate('/login');
       } catch (error) {
         console.error('Registration error:', error);
       } finally {

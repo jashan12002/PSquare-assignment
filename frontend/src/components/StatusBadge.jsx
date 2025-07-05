@@ -4,19 +4,19 @@ const StatusBadge = ({ status, onStatusChange, id, type = 'candidate' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Define status options based on type
+
   const getStatusOptions = () => {
     if (type === 'candidate') {
       return ['Shortlisted', 'Ongoing', 'Selected', 'Rejected'];
     } else if (type === 'attendance') {
-      return ['Present', 'Absent', 'Leave'];
+      return ['Present', 'Absent'];
     } else if (type === 'leave') {
       return ['Pending', 'Approved', 'Rejected'];
     }
     return [];
   };
 
-  // Get status color
+
   const getStatusColor = () => {
     if (type === 'candidate') {
       switch (status) {
@@ -25,20 +25,18 @@ const StatusBadge = ({ status, onStatusChange, id, type = 'candidate' }) => {
         case 'Interview':
           return '#3B82F6';
         case 'Selected':
-          return '#10B981';
+          return '#4d007d';
         case 'Rejected':
-          return '#EF4444';
+          return '#b70000';
         default:
-          return '#6B7280';
+          return '#a4a4a4';
       }
     } else if (type === 'attendance') {
       switch (status) {
         case 'Present':
-          return '#10B981';
+          return '#008313';
         case 'Absent':
-          return '#EF4444';
-        case 'Leave':
-          return '#3B82F6';
+          return '#b70000';
         default:
           return '#6B7280';
       }
@@ -57,7 +55,7 @@ const StatusBadge = ({ status, onStatusChange, id, type = 'candidate' }) => {
     return '#6B7280';
   };
 
-  // Close dropdown when clicking outside
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -71,12 +69,12 @@ const StatusBadge = ({ status, onStatusChange, id, type = 'candidate' }) => {
     };
   }, []);
 
-  // Toggle dropdown
+
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
 
-  // Handle status change
+    
   const handleStatusChange = (newStatus) => {
     if (onStatusChange && id) {
       onStatusChange(id, newStatus);

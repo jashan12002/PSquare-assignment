@@ -21,7 +21,6 @@ const attendanceSchema = new mongoose.Schema({
   },
 });
 
-// Create a compound index to prevent duplicate attendance records
 attendanceSchema.index({ employee: 1, date: 1 }, { unique: true });
 
 const Attendance = mongoose.model('Attendance', attendanceSchema);

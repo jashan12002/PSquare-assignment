@@ -3,6 +3,8 @@ import Header from '../components/Header';
 import StatusBadge from '../components/StatusBadge';
 import ProfileAvatar from '../components/ProfileAvatar';
 import apiService from '../utils/axiosConfig';
+import Loader from '../components/Loader';
+import SearchInput from '../components/SearchInput';
 
 const Attendance = () => {
   const [attendance, setAttendance] = useState([]);
@@ -12,6 +14,7 @@ const Attendance = () => {
   const [showModal, setShowModal] = useState(false);
   const [filters, setFilters] = useState({
     status: '',
+    search: ''
   });
   const [currentAttendance, setCurrentAttendance] = useState(null);
   const [formData, setFormData] = useState({
@@ -37,7 +40,6 @@ const Attendance = () => {
     }
   };
 
-  // Fetch attendance records and employees
   useEffect(() => {
     
     fetchData();
@@ -46,14 +48,14 @@ const Attendance = () => {
     fetchData();
   }, []);
 
-  // Create a combined list of employees with their attendance status
+
   const employeeAttendanceList = employees.map(employee => {
-    // Find attendance record for this employee (if exists)
+    
     const attendanceRecord = attendance.find(record => 
       record.employee && record.employee._id === employee._id
     );
     
-    // Return employee with attendance status
+    
     return {
       _id: attendanceRecord?._id || `temp-${employee._id}`,
       employee: employee,
@@ -63,14 +65,19 @@ const Attendance = () => {
     };
   });
 
-  // Filter attendance records
+  
   const filteredAttendanceList = employeeAttendanceList.filter((record) => {
-    return (
-      filters.status === '' || record.status === filters.status
-    );
+    const matchesStatus = filters.status === '' || record.status === filters.status;
+    const matchesSearch = filters.search === '' || 
+      record.employee?.name.toLowerCase().includes(filters.search.toLowerCase()) ||
+      record.employee?.position.toLowerCase().includes(filters.search.toLowerCase()) ||
+      record.employee?.department.toLowerCase().includes(filters.search.toLowerCase()) ||
+      getEmployeeTask(record.employee).toLowerCase().includes(filters.search.toLowerCase());
+    
+    return matchesStatus && matchesSearch;
   });
 
-  // Handle filter change
+  
   const handleFilterChange = (e) => {
     setFilters({
       ...filters,
@@ -78,7 +85,7 @@ const Attendance = () => {
     });
   };
 
-  // Handle form input change
+  
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
@@ -86,29 +93,29 @@ const Attendance = () => {
     });
   };
 
-  // Toggle actions dropdown
+  
   const toggleActions = (id) => {
     setCurrentAttendance(currentAttendance === id ? null : id);
   };
 
-  // Handle status change
+  
   const handleStatusChange = async (id, status) => {
     try {
-      // Check if this is a new record
+      
       const record = employeeAttendanceList.find(r => r._id === id);
       
       if (record && record.isNewRecord) {
-        // Create new attendance record
+        
         const newAttendance = await apiService.createAttendance({
           employee: record.employee._id,
           date: new Date().toISOString().split('T')[0],
           status: status
         });
         
-        // Update attendance list
+        
         setAttendance([...attendance, newAttendance]);
       } else {
-        // Update existing record
+        
         const updatedAttendance = await apiService.updateAttendance(id, status);
         setAttendance(
           attendance.map((record) =>
@@ -122,14 +129,14 @@ const Attendance = () => {
     }
   };
 
-  // Handle form submission
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const newAttendance = await apiService.createAttendance(formData);
       
-      // Find the employee data
+
       const employee = employees.find(emp => emp._id === formData.employee);
       
       setAttendance([
@@ -153,10 +160,9 @@ const Attendance = () => {
     }
   };
 
-  // Get task for employee
+
   const getEmployeeTask = (employee) => {
-    // This would ideally come from a tasks API
-    // For now, using hardcoded tasks based on position
+
     const tasks = {
       'Designer': 'Dashboard Home page Alignment',
       'Full Time': 'Dashboard Login page design, Dashboard Home page design',
@@ -170,6 +176,7 @@ const Attendance = () => {
 
   return (
     <div>
+      {loading && <Loader />}
       <Header title="Attendance" />
       
       <div className="card">
@@ -181,7 +188,7 @@ const Attendance = () => {
               onChange={handleFilterChange}
               className="input-select"
             >
-              <option value="">Status</option>
+              <option value="">All Status</option>
               <option value="Present">Present</option>
               <option value="Absent">Absent</option>
               <option value="Medical Leave">Medical Leave</option>
@@ -196,7 +203,12 @@ const Attendance = () => {
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
             </p>
-            <input type="text" placeholder="Search..." />
+            <input 
+              type="text" 
+              placeholder="Search..." 
+              value={filters.search}
+              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            />
           </div>
         </div>
         
@@ -205,37 +217,68 @@ const Attendance = () => {
         {loading ? (
           <p>Loading attendance records...</p>
         ) : filteredAttendanceList.length === 0 ? (
-          <p>No attendance records found.</p>
-        ) : (
           <table className="table" style={{
             borderRadius: '20px',
             overflow: 'hidden',
             border: '1px solid #e5e7eb',
+            marginLeft: '12px',
             tableLayout: 'fixed',
-            width: '100%'
+            width: '100%',
+            height: '838px',
+            borderCollapse: 'collapse',
+            backgroundColor: 'white'
           }}>
-            <thead>
-              <tr>
-                <th>Profile</th>
-                <th>Employee Name</th>
-                <th>Position</th>
-                <th>Department</th>
-                <th>Task</th>
-                <th>Status</th>
-                <th>Action</th>
+            <thead style={{ backgroundColor: '#4D007D', color: 'white', display: 'block', width: '100%' }}>
+              <tr style={{ display: 'flex', width: '100%' }}>
+                <th style={{ width: '7%', padding: '16px 8px', textAlign: 'left' }}>Profile</th>
+                <th style={{ width: '15%', padding: '16px 8px', textAlign: 'left' }}>Employee Name</th>
+                <th style={{ width: '15%', padding: '16px 8px', textAlign: 'left' }}>Position</th>
+                <th style={{ width: '15%', padding: '16px 8px', textAlign: 'left' }}>Department</th>
+                <th style={{ width: '25%', padding: '16px 8px', textAlign: 'left' }}>Task</th>
+                <th style={{ width: '13%', padding: '16px 8px', textAlign: 'left' }}>Status</th>
+                <th style={{ width: '10%', padding: '16px 8px', textAlign: 'left' }}>Action</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody style={{ maxHeight: 'calc(838px - 53px)', overflowY: 'auto', display: 'block', width: '100%' }}>
+              <tr style={{ display: 'flex', width: '100%' }}>
+                {/* <td colSpan="7" style={{ padding: '20px', textAlign: 'center', width: '100%' }}>No attendance records found.</td> */}
+              </tr>
+            </tbody>
+          </table>
+        ) : (
+          <table className="table" style={{
+            borderRadius: '20px',
+            overflow: 'hidden',
+            marginLeft: '12px',
+            border: '1px solid #e5e7eb',
+            tableLayout: 'fixed',
+            width: '100%',
+            height: '838px',
+            borderCollapse: 'collapse',
+            backgroundColor: 'white'
+          }}>
+            <thead style={{ backgroundColor: '#4D007D', color: 'white', display: 'block', width: '100%' }}>
+              <tr style={{ display: 'flex', width: '100%' }}>
+                <th style={{ width: '7%', padding: '16px 8px', textAlign: 'left' }}>Profile</th>
+                <th style={{ width: '15%', padding: '16px 8px', textAlign: 'left' }}>Employee Name</th>
+                <th style={{ width: '15%', padding: '16px 8px', textAlign: 'left' }}>Position</th>
+                <th style={{ width: '15%', padding: '16px 8px', textAlign: 'left' }}>Department</th>
+                <th style={{ width: '25%', padding: '16px 8px', textAlign: 'left' }}>Task</th>
+                <th style={{ width: '13%', padding: '16px 8px', textAlign: 'left' }}>Status</th>
+                <th style={{ width: '10%', padding: '16px 8px', textAlign: 'left' }}>Action</th>
+              </tr>
+            </thead>
+            <tbody style={{ maxHeight: 'calc(838px - 53px)', overflowY: 'visible', display: 'block', width: '100%' }}>
               {filteredAttendanceList.map((record) => (
-                <tr key={record._id}>
-                  <td>
+                <tr key={record._id} style={{ borderBottom: '1px solid #e5e7eb', display: 'flex', width: '100%' }}>
+                  <td style={{ padding: '12px 8px', width: '7%', display: 'flex', alignItems: 'center' }}>
                     <ProfileAvatar name={record.employee?.name || 'Unknown'} size="md" />
                   </td>
-                  <td>{record.employee?.name || 'Unknown'}</td>
-                  <td>{record.employee?.position || '--'}</td>
-                  <td>{record.employee?.department || 'Designer'}</td>
-                  <td style={{overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{getEmployeeTask(record.employee)}</td>
-                  <td>
+                  <td style={{ padding: '12px 8px', width: '15%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{record.employee?.name || 'Unknown'}</td>
+                  <td style={{ padding: '12px 8px', width: '15%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{record.employee?.position || '--'}</td>
+                  <td style={{ padding: '12px 8px', width: '15%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{record.employee?.department || 'Designer'}</td>
+                  <td style={{ padding: '12px 8px', width: '25%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{getEmployeeTask(record.employee)}</td>
+                  <td style={{ padding: '12px 8px', width: '13%' }}>
                     <StatusBadge 
                       status={record.status} 
                       onStatusChange={handleStatusChange}
@@ -243,7 +286,7 @@ const Attendance = () => {
                       type="attendance"
                     />
                   </td>
-                  <td>
+                  <td style={{ padding: '12px 8px', width: '10%' }}>
                     <div className="actions-menu">
                       <button
                         className="actions-toggle"
@@ -272,7 +315,7 @@ const Attendance = () => {
         )}
       </div>
       
-      {/* Mark Attendance Modal */}
+
       {showModal && (
         <div className="modal-backdrop">
           <div className="modal">

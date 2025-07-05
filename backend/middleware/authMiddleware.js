@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Middleware to protect routes
 const protect = async (req, res, next) => {
   let token;
 
@@ -10,18 +9,14 @@ const protect = async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     try {
-      // Get token from header
       token = req.headers.authorization.split(' ')[1];
 
-      console.log("token",token);
+      console.log("token", token);
 
-      // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, 'super_secret_key');
 
-      // Get user from the token
       req.user = await User.findById(decoded.id).select('-password');
 
-      // Check token expiration (2 hours)
       const currentTime = Math.floor(Date.now() / 1000);
       if (decoded.exp && decoded.exp < currentTime) {
         return res.status(401).json({ message: 'Session expired, please login again' });
@@ -39,7 +34,6 @@ const protect = async (req, res, next) => {
   }
 };
 
-// Middleware to verify HR role
 const hrOnly = (req, res, next) => {
   if (req.user && (req.user.role === 'HR' || req.user.role === 'Admin')) {
     next();
@@ -48,4 +42,4 @@ const hrOnly = (req, res, next) => {
   }
 };
 
-module.exports = { protect, hrOnly }; 
+module.exports = { protect, hrOnly };

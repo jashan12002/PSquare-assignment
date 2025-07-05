@@ -3,23 +3,17 @@ const Employee = require('../models/Employee');
 const path = require('path');
 const fs = require('fs');
 
-// @desc    Create a new candidate
-// @route   POST /api/candidates
-// @access  Private/HR
 const createCandidate = async (req, res) => {
   try {
     const { name, email, phone, position, experience, status } = req.body;
 
-    // Check if candidate already exists
     const candidateExists = await Candidate.findOne({ email });
     if (candidateExists) {
       return res.status(400).json({ message: 'Candidate already exists' });
     }
 
-    // Resume file path if uploaded
     const resumePath = req.file ? req.file.path : '';
 
-    // Create new candidate
     const candidate = await Candidate.create({
       name,
       email,
@@ -41,9 +35,6 @@ const createCandidate = async (req, res) => {
   }
 };
 
-// @desc    Get all candidates
-// @route   GET /api/candidates
-// @access  Private/HR
 const getCandidates = async (req, res) => {
   try {
     const candidates = await Candidate.find({});
@@ -54,9 +45,6 @@ const getCandidates = async (req, res) => {
   }
 };
 
-// @desc    Get candidate by ID
-// @route   GET /api/candidates/:id
-// @access  Private/HR
 const getCandidateById = async (req, res) => {
   try {
     const candidate = await Candidate.findById(req.params.id);
@@ -71,9 +59,7 @@ const getCandidateById = async (req, res) => {
   }
 };
 
-// @desc    Update candidate status
-// @route   PUT /api/candidates/:id
-// @access  Private/HR
+
 const updateCandidateStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -92,15 +78,12 @@ const updateCandidateStatus = async (req, res) => {
   }
 };
 
-// @desc    Delete candidate
-// @route   DELETE /api/candidates/:id
-// @access  Private/HR
 const deleteCandidate = async (req, res) => {
   try {
     const candidate = await Candidate.findById(req.params.id);
 
     if (candidate) {
-      // Delete resume file if exists
+
       if (candidate.resume) {
         const filePath = path.join(__dirname, '..', candidate.resume);
         if (fs.existsSync(filePath)) {
@@ -119,9 +102,6 @@ const deleteCandidate = async (req, res) => {
   }
 };
 
-// @desc    Move candidate to employee
-// @route   POST /api/candidates/:id/hire
-// @access  Private/HR
 const moveToEmployee = async (req, res) => {
   try {
     const candidate = await Candidate.findById(req.params.id);
@@ -134,13 +114,12 @@ const moveToEmployee = async (req, res) => {
       return res.status(400).json({ message: 'Only selected candidates can be moved to employees' });
     }
 
-    // Check if employee already exists with this email
+
     const employeeExists = await Employee.findOne({ email: candidate.email });
     if (employeeExists) {
       return res.status(400).json({ message: 'Employee with this email already exists' });
     }
 
-    // Create new employee from candidate data
     const employee = await Employee.create({
       name: candidate.name,
       email: candidate.email,
@@ -150,8 +129,8 @@ const moveToEmployee = async (req, res) => {
     });
 
     if (employee) {
-      // Delete the candidate after successful move
-      await candidate.deleteOne();
+     
+      // await candidate.deleteOne();
       res.status(201).json(employee);
     } else {
       res.status(400).json({ message: 'Failed to create employee' });
@@ -162,9 +141,6 @@ const moveToEmployee = async (req, res) => {
   }
 };
 
-// @desc    Download candidate resume
-// @route   GET /api/candidates/:id/resume
-// @access  Private/HR
 const downloadResume = async (req, res) => {
   try {
     const candidate = await Candidate.findById(req.params.id);
@@ -183,14 +159,12 @@ const downloadResume = async (req, res) => {
       return res.status(404).json({ message: 'Resume file not found' });
     }
 
-    // Get original filename from path
     const originalFilename = path.basename(candidate.resume);
-    
-    // Set headers for file download
+
     res.setHeader('Content-Disposition', `attachment; filename=${originalFilename}`);
     res.setHeader('Content-Type', 'application/octet-stream');
     
-    // Create read stream and pipe to response
+
     const fileStream = fs.createReadStream(filePath);
     fileStream.pipe(res);
     

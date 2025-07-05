@@ -20,14 +20,14 @@ const candidateSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['New', 'Selected', 'Rejected'],
+    enum: ['New','Ongoing', 'Selected', 'Rejected'],
     default: 'New',
   },
   experience: {
     type: String,
   },
   resume: {
-    type: String, // Path to the stored resume file
+    type: String,
   },
   createdAt: {
     type: Date,

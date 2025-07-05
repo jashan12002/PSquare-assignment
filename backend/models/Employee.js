@@ -28,7 +28,7 @@ const employeeSchema = new mongoose.Schema({
     default: 'Active',
   },
   resume: {
-    type: String, // Path to the stored resume file
+    type: String, 
   },
   joinDate: {
     type: Date,

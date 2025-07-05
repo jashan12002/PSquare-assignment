@@ -13,7 +13,7 @@ const {
 } = require('../controllers/candidateController');
 const { protect, hrOnly } = require('../middleware/authMiddleware');
 
-// Configure multer storage for resumes
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/resumes');
@@ -23,7 +23,7 @@ const storage = multer.diskStorage({
   },
 });
 
-// Check file type
+
 const fileFilter = (req, file, cb) => {
   const filetypes = /pdf|doc|docx/;
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
@@ -36,32 +36,32 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Initialize upload
+
 const upload = multer({
   storage,
   fileFilter,
   limits: { fileSize: 10000000 }, // 10MB max
 });
 
-// Get all candidates
+
 router.get('/', protect, hrOnly, getCandidates);
 
-// Get candidate by ID
+
 router.get('/:id', protect, hrOnly, getCandidateById);
 
-// Create candidate
+
 router.post('/', protect, hrOnly, upload.single('resume'), createCandidate);
 
-// Update candidate status
+
 router.put('/:id', protect, hrOnly, updateCandidateStatus);
 
-// Delete candidate
+
 router.delete('/:id', protect, hrOnly, deleteCandidate);
 
-// Move candidate to employee
+
 router.post('/:id/hire', protect, hrOnly, moveToEmployee);
 
-// Download resume
+
 router.get('/:id/resume', protect, hrOnly, downloadResume);
 
 module.exports = router; 

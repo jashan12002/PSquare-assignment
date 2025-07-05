@@ -39,13 +39,14 @@ const Sidebar = () => {
   };
 
   return (
+    <>
     <div className="sidebar">
-      {/* Logo Section */}
+
       <div className="sidebar-logo">
         <Logo />
       </div>
 
-      {/* Search Section */}
+
       <div style={{ padding: '0 20px 20px' }}>
         <div style={{ position: 'relative' }}>
           <svg
@@ -73,6 +74,7 @@ const Sidebar = () => {
               paddingRight: '16px',
               paddingTop: '10px',
               paddingBottom: '10px',
+              color: 'black',
               fontSize: '14px',
               border: '1px solid #e0e0e0',
               borderRadius: '20px',
@@ -83,7 +85,7 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Recruitment Section */}
+
       <div className="sidebar-menu-title">Recruitment</div>
       <ul className="sidebar-menu">
         <li>
@@ -101,7 +103,7 @@ const Sidebar = () => {
         </li>
       </ul>
 
-      {/* Organization Section */}
+
       <div className="sidebar-menu-title">Organization</div>
       <ul className="sidebar-menu">
         <li>
@@ -148,7 +150,7 @@ const Sidebar = () => {
         </li>
       </ul>
 
-      {/* Others Section */}
+
       <div className="sidebar-menu-title">Others</div>
       <ul className="sidebar-menu">
         <li>
@@ -162,9 +164,11 @@ const Sidebar = () => {
         </li>
       </ul>
 
-      {/* Logout Modal */}
-      <LogoutModal isOpen={showLogoutModal} onClose={closeLogoutModal} />
+
+      
     </div>
+    <LogoutModal isOpen={showLogoutModal} onClose={closeLogoutModal} />
+    </>
   );
 };
 

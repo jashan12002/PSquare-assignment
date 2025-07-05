@@ -1,8 +1,5 @@
 const Employee = require('../models/Employee');
 
-// @desc    Get all employees
-// @route   GET /api/employees
-// @access  Private/HR
 const getEmployees = async (req, res) => {
   try {
     const employees = await Employee.find({});
@@ -13,9 +10,7 @@ const getEmployees = async (req, res) => {
   }
 };
 
-// @desc    Get employee by ID
-// @route   GET /api/employees/:id
-// @access  Private/HR
+
 const getEmployeeById = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
@@ -30,9 +25,6 @@ const getEmployeeById = async (req, res) => {
   }
 };
 
-// @desc    Update employee
-// @route   PUT /api/employees/:id
-// @access  Private/HR
 const updateEmployee = async (req, res) => {
   try {
     const { name, email, phone, position, status, department, joinDate } = req.body;
@@ -46,12 +38,11 @@ const updateEmployee = async (req, res) => {
       employee.status = status || employee.status;
       employee.department = department || employee.department;
       
-      // Update join date if provided
+
       if (joinDate) {
         employee.joinDate = joinDate;
       }
 
-      // Update resume if new file is uploaded
       if (req.file) {
         employee.resume = req.file.path;
       }
@@ -67,9 +58,6 @@ const updateEmployee = async (req, res) => {
   }
 };
 
-// @desc    Delete an employee
-// @route   DELETE /api/employees/:id
-// @access  Private/HR
 const deleteEmployee = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);

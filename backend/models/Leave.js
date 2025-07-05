@@ -24,7 +24,7 @@ const leaveSchema = new mongoose.Schema({
     default: 'Pending',
   },
   document: {
-    type: String, // Path to supporting document
+    type: String, 
   },
   createdAt: {
     type: Date,

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import StatusBadge from '../components/StatusBadge';
 import apiService from '../utils/axiosConfig';
+import Loader from '../components/Loader';
+import SearchInput from '../components/SearchInput';
 
 const Candidates = () => {
   const [candidates, setCandidates] = useState([]);
@@ -12,6 +14,7 @@ const Candidates = () => {
   const [filters, setFilters] = useState({
     status: '',
     position: '',
+    search: ''
   });
   const [formData, setFormData] = useState({
     name: '',
@@ -27,7 +30,7 @@ const Candidates = () => {
   const [resumeFileName, setResumeFileName] = useState('');
   const [isDownloading, setIsDownloading] = useState(false);
 
-  // Fetch candidates
+
   useEffect(() => {
     const fetchCandidates = async () => {
       try {
@@ -44,18 +47,23 @@ const Candidates = () => {
     fetchCandidates();
   }, []);
 
-  // Filter candidates
+
   const filteredCandidates = candidates.filter((candidate) => {
-    return (
-      (filters.status === '' || candidate.status === filters.status) &&
-      (filters.position === '' || candidate.position === filters.position)
-    );
+    const matchesStatus = filters.status === '' || candidate.status === filters.status;
+    const matchesPosition = filters.position === '' || candidate.position === filters.position;
+    const matchesSearch = filters.search === '' || 
+      candidate.name.toLowerCase().includes(filters.search.toLowerCase()) ||
+      candidate.email.toLowerCase().includes(filters.search.toLowerCase()) ||
+      candidate.position.toLowerCase().includes(filters.search.toLowerCase()) ||
+      candidate.experience.toLowerCase().includes(filters.search.toLowerCase());
+    
+    return matchesStatus && matchesPosition && matchesSearch;
   });
 
-  // Get unique positions for filter
+
   const positions = [...new Set(candidates.map((candidate) => candidate.position))];
 
-  // Handle filter change
+
   const handleFilterChange = (e) => {
     setFilters({
       ...filters,
@@ -63,7 +71,7 @@ const Candidates = () => {
     });
   };
 
-  // Handle form input change
+
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
@@ -71,7 +79,7 @@ const Candidates = () => {
     });
   };
 
-  // Handle resume file upload
+
   const handleResumeUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -83,7 +91,7 @@ const Candidates = () => {
     }
   };
 
-  // Validate form
+
   const validateForm = () => {
     let errors = {};
     let isValid = true;
@@ -125,7 +133,7 @@ const Candidates = () => {
     return isValid;
   };
 
-  // Handle form submission
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -136,12 +144,12 @@ const Candidates = () => {
     try {
       const newCandidate = await apiService.createCandidate(formData);
 
-      // If the candidate is selected, automatically move to employees
+
       if (newCandidate.status === 'Selected') {
         await apiService.moveToEmployee(newCandidate._id);
-        // Show success message or notification
-        alert('Candidate has been created and moved to Employees');
-        // Optionally redirect to employees page
+
+        // alert('Candidate has been created and moved to Employees');
+
         window.location.href = '/employees';
       } else {
         setCandidates([...candidates, newCandidate]);
@@ -165,18 +173,18 @@ const Candidates = () => {
     }
   };
 
-  // Handle status change
+
   const handleStatusChange = async (id, status) => {
     try {
       const updatedCandidate = await apiService.updateCandidateStatus(id, status);
 
-      // If status is changed to Selected, automatically move to employees
+
       if (status === 'Selected') {
         await apiService.moveToEmployee(id);
         setCandidates(candidates.filter((candidate) => candidate._id !== id));
-        // Show success message or notification
-        alert('Candidate has been moved to Employees');
-        // Optionally redirect to employees page
+
+        // alert('Candidate has been moved to Employees');
+
         window.location.href = '/employees';
       } else {
         setCandidates(
@@ -191,7 +199,7 @@ const Candidates = () => {
     }
   };
 
-  // Handle hire
+
   const handleHire = async (id) => {
     try {
       await apiService.moveToEmployee(id);
@@ -202,9 +210,9 @@ const Candidates = () => {
     }
   };
 
-  // Handle delete
+
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this candidate?')) {
+   
       try {
         await apiService.deleteCandidate(id);
         setCandidates(candidates.filter((candidate) => candidate._id !== id));
@@ -212,10 +220,10 @@ const Candidates = () => {
         console.error('Error deleting candidate:', error);
         setError('Failed to delete candidate. Please try again later.');
       }
-    }
+    
   };
 
-  // Handle resume download
+
   const handleDownloadResume = async (id) => {
     try {
       setIsDownloading(true);
@@ -228,13 +236,14 @@ const Candidates = () => {
     }
   };
 
-  // Toggle actions dropdown
+
   const toggleActions = (id) => {
     setCurrentCandidate(currentCandidate === id ? null : id);
   };
 
   return (
     <div>
+      {(loading || isDownloading) && <Loader />}
       <Header title="Candidates" />
 
       <div className="card">
@@ -246,10 +255,11 @@ const Candidates = () => {
                 value={filters.status}
                 onChange={handleFilterChange}
                 className='input-select'
-                style={{ marginBottom: '0px' }}
               >
                 <option value="">All Status</option>
                 <option value="New">New</option>
+                <option value="Scheduled">Scheduled</option>
+                <option value="Ongoing">Ongoing</option>
                 <option value="Selected">Selected</option>
                 <option value="Rejected">Rejected</option>
               </select>
@@ -261,7 +271,6 @@ const Candidates = () => {
                 value={filters.position}
                 onChange={handleFilterChange}
                 className='input-select'
-                style={{ marginBottom: '0px' }}
               >
                 <option value="">All Positions</option>
                 {positions.map((position) => (
@@ -271,20 +280,24 @@ const Candidates = () => {
                 ))}
               </select>
             </div>
-
           </div>
 
+          <div className="header-search">
+            <p>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </p>
+            <input 
+              type="text" 
+              placeholder="Search..." 
+              value={filters.search}
+              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            />
+          </div>
 
           <div className='flex items-center'>
-            <div className="header-search">
-              <p>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-              </p>
-              <input style={{ marginBottom: '0px' }} type="text" placeholder="Search..." />
-            </div>
             <button className="btn-add-candidate" onClick={() => setShowModal(true)}>
               Add Candidate
             </button>
@@ -300,52 +313,82 @@ const Candidates = () => {
         {loading ? (
           <p>Loading candidates...</p>
         ) : filteredCandidates.length === 0 ? (
-          <p>No candidates found.</p>
+          <table className="table"  style={{
+            borderRadius: '20px',
+            overflow: 'hidden',
+            marginLeft: '12px',
+            border: '1px solid #e5e7eb',
+            tableLayout: 'fixed',
+            width: '100%',
+            height: '838px',
+            borderCollapse: 'collapse',
+            backgroundColor: 'white'
+          }}>
+            <thead style={{ backgroundColor: '#4D007D', color: 'white', display: 'block', width: '100%' }}>
+              <tr style={{ display: 'flex', width: '100%' }}>
+                <th style={{ width: '5%', padding: '16px 8px', textAlign: 'left' }}>Sr no.</th>
+                <th style={{ width: '15%', padding: '16px 8px', textAlign: 'left' }}>Candidates Name</th>
+                <th style={{ width: '20%', padding: '16px 8px', textAlign: 'left' }}>Email Address</th>
+                <th style={{ width: '12%', padding: '16px 8px', textAlign: 'left' }}>Phone Number</th>
+                <th style={{ width: '12%', padding: '16px 8px', textAlign: 'left' }}>Position</th>
+                <th style={{ width: '12%', padding: '16px 8px', textAlign: 'left' }}>Status</th>
+                <th style={{ width: '12%', padding: '16px 8px', textAlign: 'left' }}>Experience</th>
+                <th style={{ width: '12%', padding: '16px 8px', textAlign: 'left' }}>Action</th>
+              </tr>
+            </thead>
+            <tbody style={{ maxHeight: 'calc(838px - 53px)', overflowY: 'auto', display: 'block', width: '100%' }}>
+              <tr style={{ display: 'flex', width: '100%' }}>
+                {/* <td colSpan="8" style={{ padding: '20px', textAlign: 'center', width: '100%' }}>No candidates found.</td> */}
+              </tr>
+            </tbody>
+          </table>
         ) : (
-          // Replace your existing table element with this:
+
 
           <table
             className="table"
             style={{
               borderRadius: '20px',
               overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              border: '1px solid #e5e7eb',
-              height: '838px',
               marginLeft: '12px',
-
+              border: '1px solid #e5e7eb',
+              tableLayout: 'fixed',
+              marginLeft: '10px',
+              height: '838px',
+              width: '100%',
+              borderCollapse: 'collapse',
+              backgroundColor: 'white'
             }}
           >
-            <thead>
-              <tr>
-                <th style={{ whiteSpace: 'nowrap' }}>Sr no.</th>
-                <th style={{ whiteSpace: 'nowrap' }}>Candidates Name</th>
-                <th style={{ whiteSpace: 'nowrap' }}>Email Address</th>
-                <th style={{ whiteSpace: 'nowrap' }}>Phone Number</th>
-                <th style={{ whiteSpace: 'nowrap', width: '12%' }}>Position</th>
-                <th style={{ whiteSpace: 'nowrap' }}>Status</th>
-                <th style={{ whiteSpace: 'nowrap' }}>Experience</th>
-                <th style={{ whiteSpace: 'nowrap' }}>Action</th>
+            <thead style={{ backgroundColor: '#4D007D', color: 'white', display: 'block', width: '100%' }}>
+              <tr style={{ display: 'flex', width: '100%' }}>
+                <th style={{ width: '5%', padding: '16px 8px', textAlign: 'left' }}>Sr no.</th>
+                <th style={{ width: '15%', padding: '16px 8px', textAlign: 'left' }}>Candidates Name</th>
+                <th style={{ width: '20%', padding: '16px 8px', textAlign: 'left' }}>Email Address</th>
+                <th style={{ width: '12%', padding: '16px 8px', textAlign: 'left' }}>Phone Number</th>
+                <th style={{ width: '12%', padding: '16px 8px', textAlign: 'left' }}>Position</th>
+                <th style={{ width: '12%', padding: '16px 8px', textAlign: 'left' }}>Status</th>
+                <th style={{ width: '12%', padding: '16px 8px', textAlign: 'left' }}>Experience</th>
+                <th style={{ width: '12%', padding: '16px 8px', textAlign: 'left' }}>Action</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody style={{ maxHeight: 'calc(838px - 53px)', overflowY: 'visible', display: 'block', width: '100%' }}>
               {filteredCandidates.map((candidate, index) => (
-                <tr key={candidate._id}>
-                  <td>{String(index + 1).padStart(2, '0')}</td>
-                  <td style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{candidate.name}</td>
-                  <td style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{candidate.email}</td>
-                  <td style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{candidate.phone}</td>
-                  <td style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{candidate.position}</td>
-                  <td>
+                <tr key={candidate._id} style={{ borderBottom: '1px solid #e5e7eb', display: 'flex', width: '100%' }}>
+                  <td style={{ padding: '12px 8px', width: '5%' }}>{String(index + 1).padStart(2, '0')}</td>
+                  <td style={{ padding: '12px 8px', width: '15%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{candidate.name}</td>
+                  <td style={{ padding: '12px 8px', width: '20%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{candidate.email}</td>
+                  <td style={{ padding: '12px 8px', width: '12%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{candidate.phone}</td>
+                  <td style={{ padding: '12px 8px', width: '12%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{candidate.position}</td>
+                  <td style={{ padding: '12px 8px', width: '12%' }}>
                     <StatusBadge
                       status={candidate.status}
                       onStatusChange={handleStatusChange}
                       id={candidate._id}
                     />
                   </td>
-                  <td style={{ maxWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{candidate.experience || '-'}</td>
-                  <td>
+                  <td style={{ padding: '12px 8px', width: '12%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{candidate.experience || '-'}</td>
+                  <td style={{ padding: '12px 8px', width: '12%' }}>
                     <div className="actions-menu">
                       <button
                         className="actions-toggle"
@@ -371,14 +414,7 @@ const Candidates = () => {
                           ) : (
                             <div className="actions-item disabled">No Resume Available</div>
                           )}
-                          {candidate.status === 'Selected' && (
-                            <div
-                              className="actions-item"
-                              onClick={() => handleHire(candidate._id)}
-                            >
-                              Move to Employee
-                            </div>
-                          )}
+                         
                           <div
                             className="actions-item"
                             onClick={() => handleDelete(candidate._id)}
@@ -396,7 +432,7 @@ const Candidates = () => {
         )}
       </div>
 
-      {/* Add Candidate Modal */}
+        
       {showModal && (
         <div className="modal-backdrop">
           <div className="modal" style={{ borderRadius: '21px 21px 0px 0px' }}>

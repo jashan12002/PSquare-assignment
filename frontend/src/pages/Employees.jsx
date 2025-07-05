@@ -3,6 +3,8 @@ import Header from '../components/Header';
 import StatusBadge from '../components/StatusBadge';
 import ProfileAvatar from '../components/ProfileAvatar';
 import apiService from '../utils/axiosConfig';
+import Loader from '../components/Loader';
+import SearchInput from '../components/SearchInput';
 
 const Employees = () => {
   const [employees, setEmployees] = useState([]);
@@ -10,6 +12,7 @@ const Employees = () => {
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     position: '',
+    search: ''
   });
   const [currentEmployee, setCurrentEmployee] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -26,10 +29,8 @@ const Employees = () => {
   const [showCalendar, setShowCalendar] = useState(false);
   const calendarRef = useRef(null);
 
-  // Current month and year for calendar
   const [currentDate, setCurrentDate] = useState(new Date());
   
-  // Close calendar when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (calendarRef.current && !calendarRef.current.contains(event.target)) {
@@ -43,7 +44,6 @@ const Employees = () => {
     };
   }, []);
 
-  // Fetch employees
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
@@ -60,17 +60,19 @@ const Employees = () => {
     fetchEmployees();
   }, []);
 
-  // Filter employees
   const filteredEmployees = employees.filter((employee) => {
-    return (
-      filters.position === '' || employee.position === filters.position
-    );
+    const matchesPosition = filters.position === '' || employee.position === filters.position;
+    const matchesSearch = filters.search === '' || 
+      employee.name.toLowerCase().includes(filters.search.toLowerCase()) ||
+      employee.email.toLowerCase().includes(filters.search.toLowerCase()) ||
+      employee.position.toLowerCase().includes(filters.search.toLowerCase()) ||
+      employee.department.toLowerCase().includes(filters.search.toLowerCase());
+    
+    return matchesPosition && matchesSearch;
   });
 
-  // Get unique positions for filter
   const positions = [...new Set(employees.map((employee) => employee.position))];
 
-  // Handle filter change
   const handleFilterChange = (e) => {
     setFilters({
       ...filters,
@@ -78,12 +80,10 @@ const Employees = () => {
     });
   };
 
-  // Toggle actions dropdown
   const toggleActions = (id) => {
     setCurrentEmployee(currentEmployee === id ? null : id);
   };
 
-  // Generate initials for avatar
   const getInitials = (name) => {
     return name
       .split(' ')
@@ -93,19 +93,16 @@ const Employees = () => {
       .substring(0, 2);
   };
 
-  // Format date to MM/DD/YY
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear().toString().substring(2)}`;
   };
 
-  // Format date for input field
   const formatDateForInput = (dateString) => {
     const date = new Date(dateString);
     return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
   };
 
-  // Open edit modal
   const handleEditClick = (employee) => {
     setEditEmployee({
       ...employee,
@@ -116,7 +113,6 @@ const Employees = () => {
     setCurrentEmployee(null);
   };
 
-  // Handle edit input change
   const handleEditInputChange = (e) => {
     setEditEmployee({
       ...editEmployee,
@@ -124,7 +120,6 @@ const Employees = () => {
     });
   };
 
-  // Calendar navigation
   const prevMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
   };
@@ -133,17 +128,17 @@ const Employees = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   };
 
-  // Get days in month
+
   const getDaysInMonth = (year, month) => {
     return new Date(year, month + 1, 0).getDate();
   };
 
-  // Get first day of month (0 = Sunday, 1 = Monday, etc.)
+
   const getFirstDayOfMonth = (year, month) => {
     return new Date(year, month, 1).getDay();
   };
 
-  // Handle date selection
+
   const handleDateSelect = (day) => {
     const selectedDate = new Date(
       currentDate.getFullYear(),
@@ -159,7 +154,7 @@ const Employees = () => {
     setShowCalendar(false);
   };
 
-  // Generate calendar days
+
   const generateCalendarDays = () => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -168,12 +163,23 @@ const Employees = () => {
     
     const days = [];
     
-    // Add empty cells for days before the first day of the month
+    // Empty days at the beginning of the month
     for (let i = 0; i < firstDayOfMonth; i++) {
-      days.push(<div key={`empty-${i}`} className="calendar-day empty"></div>);
+      days.push(
+        <div 
+          key={`empty-${i}`} 
+          style={{
+            width: '30px',
+            height: '30px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        ></div>
+      );
     }
     
-    // Add days of the month
+    // Actual days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
       const isToday = new Date().toDateString() === date.toDateString();
@@ -182,7 +188,20 @@ const Employees = () => {
       days.push(
         <div 
           key={`day-${day}`} 
-          className={`calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`}
+          style={{
+            width: '30px',
+            height: '30px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            borderRadius: '50%',
+            fontSize: '14px',
+            fontWeight: isSelected ? '500' : 'normal',
+            backgroundColor: isSelected ? '#4D007D' : 'transparent',
+            color: isSelected ? 'white' : isToday ? '#4D007D' : '#333',
+            border: isToday && !isSelected ? '1px solid #4D007D' : 'none'
+          }}
           onClick={() => handleDateSelect(day)}
         >
           {day}
@@ -193,7 +212,7 @@ const Employees = () => {
     return days;
   };
 
-  // Validate edit form
+
   const validateEditForm = () => {
     let errors = {};
     let isValid = true;
@@ -235,7 +254,7 @@ const Employees = () => {
     return isValid;
   };
 
-  // Handle edit form submission
+
   const handleEditSubmit = async (e) => {
     e.preventDefault();
 
@@ -264,9 +283,9 @@ const Employees = () => {
     }
   };
 
-  // Handle delete
+
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this employee?')) {
+    
       try {
         await apiService.deleteEmployee(id);
         setEmployees(employees.filter(employee => employee._id !== id));
@@ -274,10 +293,10 @@ const Employees = () => {
         console.error('Error deleting employee:', error);
         setError('Failed to delete employee. Please try again later.');
       }
-    }
+    
   };
 
-  // Get month name
+
   const getMonthName = (month) => {
     const months = [
       'January', 'February', 'March', 'April', 'May', 'June',
@@ -288,24 +307,28 @@ const Employees = () => {
 
   return (
     <div>
+      {loading && <Loader />}
       <Header title="Employees" />
       
       <div className="card">
         <div className="filters">
-          <div className="filter-select">
-            <select 
-              name="position" 
-              value={filters.position} 
-              onChange={handleFilterChange}
-              className="input-select"
-            >
-              <option value="">Position</option>
-              {positions.map((position) => (
-                <option key={position} value={position}>
-                  {position}
-                </option>
-              ))}
-            </select>
+          <div className='flex gap-4 items-center'>
+           
+            <div className="filter-select">
+              <select
+                name="position"
+                value={filters.position}
+                onChange={handleFilterChange}
+                className='input-select'
+              >
+                <option value="">All Positions</option>
+                {positions.map((position) => (
+                  <option key={position} value={position}>
+                    {position}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="header-search">
@@ -315,7 +338,12 @@ const Employees = () => {
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
             </p>
-            <input type="text" placeholder="Search..." />
+            <input 
+              type="text" 
+              placeholder="Search..." 
+              value={filters.search}
+              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            />
           </div>
         </div>
         
@@ -324,40 +352,72 @@ const Employees = () => {
         {loading ? (
           <p>Loading employees...</p>
         ) : filteredEmployees.length === 0 ? (
-          <p>No employees found.</p>
-        ) : (
-          <table className="table"  style={{
+          <table className="table" style={{
             borderRadius: '20px',
+            marginLeft: '12px',
             overflow: 'hidden',
             border: '1px solid #e5e7eb',
             tableLayout: 'fixed',
-            width: '100%'
+            height: '838px',
+            width: '100%',
+            borderCollapse: 'collapse',
+            backgroundColor: 'white'
           }}>
-            <thead>
-              <tr>
-                <th style={{ width: '7%' }}>Profile</th>
-                <th style={{ width: '15%' }}>Employee Name</th>
-                <th style={{ width: '20%' }}>Email Address</th>
-                <th style={{ width: '12%' }}>Phone Number</th>
-                <th style={{ width: '12%' }}>Position</th>
-                <th style={{ width: '12%' }}>Department</th>
-                <th style={{ width: '12%' }}>Date of Joining</th>
-                <th style={{ width: '10%' }}>Action</th>
+            <thead style={{ backgroundColor: '#4D007D', color: 'white', display: 'block', width: '100%' }}>
+              <tr style={{ display: 'flex', width: '100%' }}>
+                <th style={{ width: '7%', padding: '16px 8px', textAlign: 'left' }}>Profile</th>
+                <th style={{ width: '15%', padding: '16px 8px', textAlign: 'left' }}>Employee Name</th>
+                <th style={{ width: '20%', padding: '16px 8px', textAlign: 'left' }}>Email Address</th>
+                <th style={{ width: '12%', padding: '16px 8px', textAlign: 'left' }}>Phone Number</th>
+                <th style={{ width: '12%', padding: '16px 8px', textAlign: 'left' }}>Position</th>
+                <th style={{ width: '12%', padding: '16px 8px', textAlign: 'left' }}>Department</th>
+                <th style={{ width: '12%', padding: '16px 8px', textAlign: 'left' }}>Date of Joining</th>
+                <th style={{ width: '10%', padding: '16px 8px', textAlign: 'left' }}>Action</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody style={{ maxHeight: 'calc(838px - 53px)', overflowY: 'visible !important', display: 'block', width: '100%' }}>
+              <tr style={{ display: 'flex', width: '100%' }}>
+                {/* <td colSpan="8" style={{ padding: '20px', textAlign: 'center', width: '100%' }}>No employees found.</td> */}
+              </tr>
+            </tbody>
+          </table>
+        ) : (
+          <table className="table" style={{
+            borderRadius: '20px',
+            marginLeft: '12px',
+            overflow: 'hidden',
+            border: '1px solid #e5e7eb',
+            tableLayout: 'fixed',
+            height: '838px',
+            width: '100%',
+            borderCollapse: 'collapse',
+            backgroundColor: 'white'
+          }}>
+            <thead style={{ backgroundColor: '#4D007D', color: 'white', display: 'block', width: '100%' }}>
+              <tr style={{ display: 'flex', width: '100%' }}>
+                <th style={{ width: '7%', padding: '16px 8px', textAlign: 'left' }}>Profile</th>
+                <th style={{ width: '15%', padding: '16px 8px', textAlign: 'left' }}>Employee Name</th>
+                <th style={{ width: '20%', padding: '16px 8px', textAlign: 'left' }}>Email Address</th>
+                <th style={{ width: '12%', padding: '16px 8px', textAlign: 'left' }}>Phone Number</th>
+                <th style={{ width: '12%', padding: '16px 8px', textAlign: 'left' }}>Position</th>
+                <th style={{ width: '12%', padding: '16px 8px', textAlign: 'left' }}>Department</th>
+                <th style={{ width: '12%', padding: '16px 8px', textAlign: 'left' }}>Date of Joining</th>
+                <th style={{ width: '10%', padding: '16px 8px', textAlign: 'left' }}>Action</th>
+              </tr>
+            </thead>
+            <tbody style={{ maxHeight: 'calc(838px - 53px)', overflowY: 'visible !important', display: 'block', width: '100%' }}>
               {filteredEmployees.map((employee, index) => (
-                <tr key={employee._id}>
-                  <td>
+                <tr key={employee._id} style={{ borderBottom: '1px solid #e5e7eb', display: 'flex', width: '100%' }}>
+                  <td style={{ padding: '12px 8px', width: '7%', display: 'flex', alignItems: 'center' }}>
                     <ProfileAvatar name={employee.name} size="md" />
                   </td>
-                  <td style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{employee.name}</td>
-                  <td style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{employee.email}</td>
-                  <td style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{employee.phone}</td>
-                  <td style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{employee.position}</td>
-                  <td style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{employee.department || 'Designer'}</td>
-                  <td style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{formatDate(employee.joinDate)}</td>
-                  <td>
+                  <td style={{ padding: '12px 8px', width: '15%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{employee.name}</td>
+                  <td style={{ padding: '12px 8px', width: '20%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{employee.email}</td>
+                  <td style={{ padding: '12px 8px', width: '12%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{employee.phone}</td>
+                  <td style={{ padding: '12px 8px', width: '12%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{employee.position}</td>
+                  <td style={{ padding: '12px 8px', width: '12%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{employee.department || 'Designer'}</td>
+                  <td style={{ padding: '12px 8px', width: '12%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{formatDate(employee.joinDate)}</td>
+                  <td style={{ padding: '12px 8px', width: '10%' }}>
                     <div className="actions-menu">
                       <button
                         className="actions-toggle"
@@ -395,10 +455,10 @@ const Employees = () => {
         )}
       </div>
 
-      {/* Edit Employee Modal */}
+        
       {showEditModal && (
         <div className="modal-backdrop">
-          <div className="modal" style={{borderRadius: '21px 21px 0px 0px'}}>
+          <div className="modal" style={{borderRadius: '21px 21px 0px 0px', overflow: 'visible'}}>
             <div className="modal-header" style={{backgroundColor: '#4D007D', color: 'white', fontWeight: '500'}}>
               <div> </div>
               <h3 className="modal-title" style={{color: 'white', fontWeight: '500'}}>Edit Employee Details</h3>
@@ -484,10 +544,10 @@ const Employees = () => {
                     >
                       <option value="">Select Position</option>
                       <option value="Intern">Intern</option>
+                      <option value="full time">Full Time </option>
                       <option value="Junior">Junior</option>
                       <option value="Senior">Senior</option>
                       <option value="Team Lead">Team Lead</option>
-                      <option value="Manager">Manager</option>
                     </select>
                     <label htmlFor="position">Position*</label>
                     {editErrors.position && (
@@ -518,23 +578,65 @@ const Employees = () => {
                       </div>
                       
                       {showCalendar && (
-                        <div className="calendar-popup" ref={calendarRef}>
-                          <div className="calendar-header">
-                            <button type="button" className="calendar-nav" onClick={prevMonth}>
+                        <div className="calendar-popup" ref={calendarRef} style={{
+                          position: 'absolute',
+                          fontFamily: 'Nunito',
+                          top: '60%',
+                          left: '0px',
+                          zIndex: '100',
+                          backgroundColor: 'white',
+                          border: '1px solid rgb(229, 231, 235)',
+                          borderRadius: '8px',
+                          boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 6px',
+                          width: '280px',
+                          padding: '10px',
+                          marginTop: '5px'
+                        }}>
+                          <div className="calendar-header" style={{
+                           display: 'flex',
+                           justifyContent: 'flex-start',
+                           alignItems: 'center',
+                           marginBottom: '9px',
+                           marginTop: '4px',
+                           gap: '10px'
+                          }}>
+                            <button type="button" className="calendar-nav" onClick={prevMonth} style={{
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              color: '#4D007D'
+                            }}>
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <polyline points="15 18 9 12 15 6"></polyline>
                               </svg>
                             </button>
-                            <div className="calendar-title">
+                            <div className="calendar-title" style={{
+                              fontWeight: '500',
+                              fontSize: '16px'
+                            }}>
                               {getMonthName(currentDate.getMonth())}, {currentDate.getFullYear()}
                             </div>
-                            <button type="button" className="calendar-nav" onClick={nextMonth}>
+                            <button type="button" className="calendar-nav" onClick={nextMonth} style={{
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              color: '#4D007D'
+                            }}>
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <polyline points="9 18 15 12 9 6"></polyline>
                               </svg>
                             </button>
                           </div>
-                          <div className="calendar-weekdays">
+                          <div className="calendar-weekdays" style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(7, 1fr)',
+                            gap: '1px',
+                            textAlign: 'center',
+                            fontWeight: '500',
+                            color: '#6B7280',
+                            fontSize: '14px',
+                            marginBottom: '0px'
+                          }}>
                             <div>Sun</div>
                             <div>Mon</div>
                             <div>Tue</div>
@@ -543,7 +645,13 @@ const Employees = () => {
                             <div>Fri</div>
                             <div>Sat</div>
                           </div>
-                          <div className="calendar-days">
+                          <div className="calendar-days" style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(7, 1fr)',
+                            gap: '1px',
+                            textAlign: 'center',
+                            justifyItems: 'center'
+                          }}>
                             {generateCalendarDays()}
                           </div>
                         </div>

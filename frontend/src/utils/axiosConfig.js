@@ -1,17 +1,17 @@
 import axios from 'axios';
 
+// const API_URL = 'https://psquare-backend-3p30.onrender.com/api';
+// const BASE_URL = 'https://psquare-backend-3p30.onrender.com';
+
 const API_URL = 'http://localhost:5000/api';
 const BASE_URL = 'http://localhost:5000';
 
-// Simple API service without interceptors
 const apiService = {
-  // Get auth header
   getAuthHeader() {
     const token = localStorage.getItem('token');
     return token ? { Authorization: `Bearer ${token}` } : {};
   },
 
-  // Auth services
   async login(userData) {
     const response = await axios.post(`${API_URL}/users/login`, userData);
     return response.data;
@@ -31,7 +31,6 @@ const apiService = {
     return response.data;
   },
 
-  // Candidate services
   async getCandidates() {
     const headers = this.getAuthHeader();
     const response = await axios.get(`${API_URL}/candidates`, { 
@@ -51,11 +50,9 @@ const apiService = {
   async createCandidate(candidateData) {
     const headers = this.getAuthHeader();
     
-    // Check if candidateData contains a resume file
     if (candidateData.resume instanceof File) {
       const formData = new FormData();
       
-      // Append all candidate data to formData
       Object.keys(candidateData).forEach(key => {
         if (key === 'resume') {
           formData.append('resume', candidateData.resume);
@@ -72,7 +69,6 @@ const apiService = {
       });
       return response.data;
     } else {
-      // Regular JSON request if no file
       const response = await axios.post(`${API_URL}/candidates`, candidateData, {
         headers
       });
@@ -108,17 +104,14 @@ const apiService = {
     const headers = this.getAuthHeader();
     const response = await axios.get(`${API_URL}/candidates/${id}/resume`, {
       headers,
-      responseType: 'blob' // Important for file downloads
+      responseType: 'blob'
     });
     
-    // Create a URL for the blob
     const url = window.URL.createObjectURL(new Blob([response.data]));
     
-    // Create a temporary link element
     const link = document.createElement('a');
     link.href = url;
     
-    // Get filename from Content-Disposition header or use default
     const contentDisposition = response.headers['content-disposition'];
     const filename = contentDisposition
       ? contentDisposition.split('filename=')[1].replace(/"/g, '')
@@ -127,7 +120,6 @@ const apiService = {
     link.setAttribute('download', filename);
     document.body.appendChild(link);
     
-    // Trigger download and cleanup
     link.click();
     window.URL.revokeObjectURL(url);
     document.body.removeChild(link);
@@ -135,7 +127,6 @@ const apiService = {
     return true;
   },
 
-  // Employee services
   async getEmployees() {
     const headers = this.getAuthHeader();
     const response = await axios.get(`${API_URL}/employees`, { 
@@ -168,7 +159,6 @@ const apiService = {
     return response.data;
   },
 
-  // Attendance services
   async getAttendance() {
     const headers = this.getAuthHeader();
     const response = await axios.get(`${API_URL}/attendance`, { 
@@ -209,7 +199,6 @@ const apiService = {
     return response.data;
   },
 
-  // Leave services
   async getLeaves() {
     const headers = this.getAuthHeader();
     const response = await axios.get(`${API_URL}/leaves`, { 
@@ -237,8 +226,6 @@ const apiService = {
   async createLeave(leaveData) {
     const headers = this.getAuthHeader();
     
-    // If leaveData is FormData, don't set Content-Type
-    // The browser will set it automatically with the boundary parameter
     const config = {
       headers: headers
     };
@@ -266,16 +253,12 @@ const apiService = {
   async downloadLeaveDocument(documentPath) {
     const headers = this.getAuthHeader();
     try {
-      // Handle different document path formats
       let url;
       if (documentPath.startsWith('http')) {
-        // If it's already a full URL
         url = documentPath;
       } else if (documentPath.startsWith('/')) {
-        // If it starts with a slash
         url = `${BASE_URL}${documentPath}`;
       } else {
-        // Otherwise assume it's a relative path
         url = `${BASE_URL}/${documentPath}`;
       }
 
@@ -286,24 +269,18 @@ const apiService = {
         responseType: 'blob'
       });
 
-      // Get the content type from the response
       const contentType = response.headers['content-type'];
       
-      // Create a blob with the correct content type
       const blob = new Blob([response.data], { type: contentType });
       
-      // Create a URL for the blob
       const url_obj = window.URL.createObjectURL(blob);
       
-      // Get filename from the path
       const filename = documentPath.split('/').pop();
       
-      // Create a temporary link element
       const link = document.createElement('a');
       link.href = url_obj;
       link.setAttribute('download', filename);
       
-      // Append to body, click and cleanup
       document.body.appendChild(link);
       link.click();
       window.URL.revokeObjectURL(url_obj);

@@ -1,6 +1,5 @@
 import React from 'react';
 
-// Sample profile images
 const profileImages = [
   '/profile1.jpg',
   '/profile2.jpg',
@@ -10,15 +9,14 @@ const profileImages = [
 ];
 
 const ProfileAvatar = ({ name, image, size = 'md' }) => {
-  // Generate consistent profile image based on name
+  
   const getProfileImage = (name) => {
-    // Use the sum of character codes to select a consistent image for a name
+   
     const charCodeSum = name.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
     const imageIndex = charCodeSum % profileImages.length;
     return profileImages[imageIndex];
   };
 
-  // Generate initials for avatar
   const getInitials = (name) => {
     if (!name) return 'NA';
     return name
@@ -29,7 +27,6 @@ const ProfileAvatar = ({ name, image, size = 'md' }) => {
       .substring(0, 2);
   };
 
-  // Determine size class
   const sizeClass = {
     sm: 'avatar-sm',
     md: 'avatar-md',

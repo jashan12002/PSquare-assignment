@@ -3,6 +3,8 @@ import Header from '../components/Header';
 import StatusBadge from '../components/StatusBadge';
 import ProfileAvatar from '../components/ProfileAvatar';
 import apiService from '../utils/axiosConfig';
+import Loader from '../components/Loader';
+import SearchInput from '../components/SearchInput';
 import {
   formatDate,
   formatShortDate,
@@ -24,6 +26,7 @@ const Leaves = () => {
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(null);
   const [filters, setFilters] = useState({
     status: '',
+    search: ''
   });
   const [formData, setFormData] = useState({
     employee: '',
@@ -85,7 +88,14 @@ const Leaves = () => {
 
   // Filter leave records
   const filteredLeaves = leaves.filter((leave) => {
-    return filters.status === '' || leave.status === filters.status;
+    const matchesStatus = filters.status === '' || leave.status === filters.status;
+    const matchesSearch = filters.search === '' || 
+      leave.employee?.name.toLowerCase().includes(filters.search.toLowerCase()) ||
+      leave.employee?.position.toLowerCase().includes(filters.search.toLowerCase()) ||
+      leave.reason.toLowerCase().includes(filters.search.toLowerCase()) ||
+      leave.status.toLowerCase().includes(filters.search.toLowerCase());
+    
+    return matchesStatus && matchesSearch;
   });
 
   // Handle filter change
@@ -288,7 +298,7 @@ const Leaves = () => {
     };
   }, []);
 
-  // Generalized calendar day generator
+
   const generateCalendarDays = (options = {}) => {
     const {
       clickable = false,
@@ -303,7 +313,7 @@ const Leaves = () => {
 
     const days = [];
 
-    // Empty cells for days before the first day of the month
+
     for (let i = 0; i < firstDayOfMonth; i++) {
       if (isModal) {
         days.push(<div key={`empty-${i}`} style={{ width: '40px', height: '40px' }}></div>);
@@ -312,7 +322,7 @@ const Leaves = () => {
       }
     }
 
-    // Add days of the month
+
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
       const isSelected = isModal ? 
@@ -321,11 +331,11 @@ const Leaves = () => {
       const leavesOnDay = leavesForIndicator.filter(leave => formatShortDate(leave.startDate) === formatShortDate(date));
       const hasLeaves = leavesOnDay.length > 0;
 
-      // Different styling for modal calendar vs. main calendar
+
       let cellStyle;
 
       if (isModal) {
-        // Modal calendar cell styling
+
         cellStyle = {
           width: '40px',
           height: '40px',
@@ -346,7 +356,7 @@ const Leaves = () => {
           cellStyle.borderRadius = '2px';
         }
       } else {
-        // Main calendar cell styling
+
         cellStyle = {
           position: 'relative',
           padding: '10px',
@@ -422,13 +432,14 @@ const Leaves = () => {
     return days;
   };
 
-  // Filter approved leaves based on selected date
+
   const filteredApprovedLeaves = selectedCalendarDate
     ? approvedLeaves.filter(leave => formatShortDate(leave.startDate) === formatShortDate(selectedCalendarDate))
     : approvedLeaves;
 
   return (
     <div className="leaves-container">
+      {(loading || isDownloading) && <Loader />}
       <Header title="Leaves" />
 
       <div className="filters ">
@@ -439,7 +450,7 @@ const Leaves = () => {
             onChange={handleFilterChange}
             className="input-select"
           >
-            <option value="">Status</option>
+            <option value="">All Status</option>
             <option value="Pending">Pending</option>
             <option value="Approved">Approved</option>
             <option value="Rejected">Rejected</option>
@@ -455,7 +466,12 @@ const Leaves = () => {
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
             </p>
-            <input style={{ marginBottom: '0px' }} type="text" placeholder="Search..." />
+            <input 
+              type="text" 
+              placeholder="Search..." 
+              value={filters.search}
+              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            />
           </div>
           <button className="btn btn-primary" onClick={() => setShowModal(true)}>
             Add Leave
@@ -465,7 +481,7 @@ const Leaves = () => {
       </div>
 
       <div className="leaves-content">
-        {/* Applied Leaves Section */}
+
         <div className="card applied-leaves">
 
 
@@ -475,7 +491,33 @@ const Leaves = () => {
           {loading ? (
             <p>Loading leave records...</p>
           ) : filteredLeaves.length === 0 ? (
-            <p>No leave records found.</p>
+            <table className="table" style={{
+              borderRadius: '20px',
+              overflow: 'hidden',
+              border: '1px solid #e5e7eb',
+              tableLayout: 'fixed',
+              marginLeft: '12px',
+              width: '572px',
+              height: '838px',
+              borderCollapse: 'collapse',
+              backgroundColor: 'white'
+            }}>
+              <thead style={{ backgroundColor: '#4D007D', color: 'white', display: 'block', width: '100%' }}>
+                <tr style={{ display: 'flex', width: '100%' }}>
+                  <th style={{ width: '10%', padding: '16px 8px', textAlign: 'left' }}>Profile</th>
+                  <th style={{ width: '20%', padding: '16px 8px', textAlign: 'left' }}>Name</th>
+                  <th style={{ width: '15%', padding: '16px 8px', textAlign: 'left' }}>Date</th>
+                  <th style={{ width: '25%', padding: '16px 8px', textAlign: 'left' }}>Reason</th>
+                  <th style={{ width: '20%', padding: '16px 8px', textAlign: 'left' }}>Status</th>
+                  <th style={{ width: '10%', padding: '16px 8px', textAlign: 'left' }}>Docs</th>
+                </tr>
+              </thead>
+              <tbody style={{ maxHeight: 'calc(838px - 53px)', overflowY: 'visible',  display: 'block', width: '100%' }}>
+                <tr style={{ display: 'flex', width: '100%' }}>
+                  {/* <td colSpan="6" style={{ padding: '20px', textAlign: 'center', width: '100%' }}>No leave records found.</td> */}
+                </tr>
+              </tbody>
+            </table>
           ) : (
             <table className="table" style={{
               borderRadius: '20px',
@@ -484,37 +526,34 @@ const Leaves = () => {
               tableLayout: 'fixed',
               width: '100%',
               height: '838px',
-              display: 'flex',
-              flexDirection: 'column',
-
-
+              borderCollapse: 'collapse',
+              backgroundColor: 'white'
             }}>
-              <thead>
-                <tr>
-                  <th>Profile</th>
-                  <th>Name</th>
-                  <th>Date</th>
-                  <th>Reason</th>
-                  <th>Status</th>
-                  <th>Docs</th>
-
+              <thead style={{ backgroundColor: '#4D007D', color: 'white', display: 'block', width: '100%' }}>
+                <tr style={{ display: 'flex', width: '100%' }}>
+                  <th style={{ width: '10%', padding: '16px 8px', textAlign: 'left' }}>Profile</th>
+                  <th style={{ width: '20%', padding: '16px 8px', textAlign: 'left' }}>Name</th>
+                  <th style={{ width: '15%', padding: '16px 8px', textAlign: 'left' }}>Date</th>
+                  <th style={{ width: '25%', padding: '16px 8px', textAlign: 'left' }}>Reason</th>
+                  <th style={{ width: '20%', padding: '16px 8px', textAlign: 'left' }}>Status</th>
+                  <th style={{ width: '10%', padding: '16px 8px', textAlign: 'left' }}>Docs</th>
                 </tr>
               </thead>
-              <tbody style={{ fontSize: '15px' }}>
+              <tbody style={{ maxHeight: 'calc(838px - 53px)', overflowY: 'visible', display: 'block', width: '100%', fontSize: '15px' }}>
                 {filteredLeaves.map((leave) => (
-                  <tr key={leave._id}>
-                    <td>
+                  <tr key={leave._id} style={{ borderBottom: '1px solid #e5e7eb', display: 'flex', width: '100%' }}>
+                    <td style={{ padding: '12px 8px', width: '10%', display: 'flex', alignItems: 'center' }}>
                       <ProfileAvatar name={leave.employee?.name || 'Unknown'} size="md" />
                     </td>
-                    <td>
+                    <td style={{ padding: '12px 8px', width: '20%' }}>
                       <div>
-                        <p style={{ fontSize: '16px' }}>{leave.employee?.name || 'Unknown'}</p>
+                        <p style={{ fontSize: '16px', margin: '0' }}>{leave.employee?.name || 'Unknown'}</p>
                         <div className="employee-position" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{leave.employee?.position || ''}</div>
                       </div>
                     </td>
-                    <td>{formatShortDate(leave.startDate)}</td>
-                    <td>{leave.reason}</td>
-                    <td>
+                    <td style={{ padding: '12px 8px', width: '15%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{formatShortDate(leave.startDate)}</td>
+                    <td style={{ padding: '12px 8px', width: '25%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{leave.reason}</td>
+                    <td style={{ padding: '12px 8px', width: '20%' }}>
                       <StatusBadge
                         status={leave.status}
                         onStatusChange={handleStatusChange}
@@ -522,7 +561,7 @@ const Leaves = () => {
                         type="leave"
                       />
                     </td>
-                    <td>
+                    <td style={{ padding: '12px 8px', width: '10%' }}>
                       {leave.document ? (
                         <button 
                           onClick={() => handleDocumentDownload(leave.document)}
@@ -544,7 +583,6 @@ const Leaves = () => {
                           </svg>
                       )}
                     </td>
-
                   </tr>
                 ))}
               </tbody>
@@ -552,7 +590,7 @@ const Leaves = () => {
           )}
         </div>
 
-        {/* Leave Calendar Section */}
+
         <div className="card leave-calendar">
 
           <div style={{ backgroundColor: '#4D007D', color: 'white', padding: '10px', borderRadius: '20px 20px 0px 0px' }}>
@@ -592,7 +630,7 @@ const Leaves = () => {
               {generateCalendarDays({ clickable: false, highlightSelected: false, leavesForIndicator: approvedLeaves })}
             </div>
 
-            {/* Approved Leaves List */}
+
             <div className="approved-leaves" style={{ marginTop: '20px' }}>
               <h4 style={{ fontWeight: '500', marginBottom: '15px', fontSize: '16px' }}>
                 Approved Leaves
@@ -624,7 +662,7 @@ const Leaves = () => {
         </div>
       </div>
 
-      {/* Apply for Leave Modal */}
+
       {showModal && (
         <div className="modal-backdrop" style={{
           position: 'fixed',
@@ -722,7 +760,7 @@ const Leaves = () => {
                       )}
                     </div>
 
-                    {/* Employee dropdown */}
+
                     {showEmployeeDropdown && (
                       <div className="employee-dropdown" style={{
                         position: 'absolute',
@@ -847,21 +885,23 @@ const Leaves = () => {
                       <div className="date-picker-calendar" ref={datePickerRef} style={{
                         position: 'absolute',
                         top: '100%',
-                        left: 0,
-                        zIndex: 100,
+                        left: '0px',
+                        zIndex: '100',
                         width: '400px',
                         backgroundColor: 'white',
                         borderRadius: '12px',
                         marginTop: '10px',
-                        boxShadow: '0 0 0 5px rgba(255,255,255,0.4), 0 5px 15px rgba(0,0,0,0.1)',
-                        padding: '20px',
+                        boxShadow: '3px 3px 52px 5px rgba(177,177,177,0.75)',
+                        WebkitBoxShadow: '3px 3px 52px 5px rgba(177,177,177,0.75)',
+                        MozBoxShadow: '3px 3px 52px 5px rgba(177,177,177,0.75)',
+                        padding: '2px',
                         overflow: 'hidden'
                       }}>
                         <div className="calendar-header" style={{
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                          marginBottom: '20px'
+                          marginBottom: '10px'
                         }}>
                           <button type="button" className="calendar-nav" onClick={prevMonth} style={{
                             background: 'none',
@@ -895,7 +935,7 @@ const Leaves = () => {
                           textAlign: 'center',
                           fontSize: '14px',
                           fontWeight: '500',
-                          marginBottom: '10px'
+                          marginBottom: '0px'
                         }}>
                           <div>S</div>
                           <div>M</div>
@@ -909,7 +949,7 @@ const Leaves = () => {
                         <div className="calendar-days" style={{
                           display: 'grid',
                           gridTemplateColumns: 'repeat(7, 1fr)',
-                          gap: '8px',
+                          gap: '0px',
                           textAlign: 'center'
                         }}>
                           {generateCalendarDays({
