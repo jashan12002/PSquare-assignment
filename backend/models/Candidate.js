@@ -20,7 +20,7 @@ const candidateSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['New','Ongoing', 'Selected', 'Rejected'],
+    enum: ['Scheduled','Ongoing', 'Selected', 'Rejected', 'New'],
     default: 'New',
   },
   experience: {

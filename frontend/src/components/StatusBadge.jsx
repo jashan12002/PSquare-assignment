@@ -7,7 +7,7 @@ const StatusBadge = ({ status, onStatusChange, id, type = 'candidate' }) => {
 
   const getStatusOptions = () => {
     if (type === 'candidate') {
-      return ['Shortlisted', 'Ongoing', 'Selected', 'Rejected'];
+      return ['Scheduled', 'Ongoing', 'Selected', 'Rejected'];
     } else if (type === 'attendance') {
       return ['Present', 'Absent'];
     } else if (type === 'leave') {
@@ -20,10 +20,10 @@ const StatusBadge = ({ status, onStatusChange, id, type = 'candidate' }) => {
   const getStatusColor = () => {
     if (type === 'candidate') {
       switch (status) {
-        case 'Shortlisted':
-          return '#FFB800';
-        case 'Interview':
-          return '#3B82F6';
+        case 'Scheduled':
+          return '#e8b000';
+        case 'Ongoing':
+          return '#008313';
         case 'Selected':
           return '#4d007d';
         case 'Rejected':
