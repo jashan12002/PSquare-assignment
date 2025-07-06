@@ -47,10 +47,6 @@ const Header = ({ title }) => {
     console.log('Manage Notification clicked');
   };
 
-  const handleLogout = () => {
-    setShowDropdown(false);
-    setShowLogoutModal(true);
-  };
 
   const closeLogoutModal = () => {
     setShowLogoutModal(false);
@@ -92,7 +88,7 @@ const Header = ({ title }) => {
               <div className="dropdown-item" onClick={handleEditProfile}>Edit Profile</div>
               <div className="dropdown-item" onClick={handleChangePassword}>Change Password</div>
               <div className="dropdown-item" onClick={handleManageNotification}>Manage Notification</div>
-              <div className="dropdown-item" onClick={handleLogout}>Logout</div>
+              
             </div>
           )}
         </div>
