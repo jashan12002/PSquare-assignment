@@ -111,63 +111,48 @@ const Login = () => {
           fontFamily: 'system-ui, sans-serif'
         }}>
 
-          <div style={{
-            flex: 1,
-            backgroundColor: '#5E1DAD',
-            padding: '40px',
-            color: 'white',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            position: 'relative'
-          }}>
-            <div style={{
-              maxWidth: '400px',
-              textAlign: 'center',
-              paddingTop: '2rem'
-            }}>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                overflow: 'hidden',
-                height: '50%',
-                borderRadius: '10px'
-              }}>
-                <img
-                  src="/loginBAnner.png"
-                  alt="Dashboard Preview"
-                  style={{
-                    width: '100%',
-                    borderRadius: '10px',
-                    marginBottom: '20px'
-                  }}
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                  }}
-                />
-              </div>
-
-              <h1 style={{
-                fontSize: '24px',
-                fontWeight: '200',
-                marginBottom: '15px',
-                marginTop: '15px'
-              }}>
-                Welcome to Our Platform
-              </h1>
-
-              <p style={{
-                fontSize: '14px',
-                opacity: 0.9,
-                lineHeight: '1.6'
-              }}>
-                Access your dashboard and manage your candidates with ease.
-                Our platform provides comprehensive tools for efficient management.
-              </p>
+<div style={{ 
+          flex: 1,
+          backgroundColor: '#5E1DAD',
+          padding: '40px',
+          color: 'white',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          position: 'relative'
+        }}>
+          <div style={{ maxWidth: '400px', textAlign: 'center', paddingTop: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', height: '50%', borderRadius: '10px' }}>
+              <img 
+                src="/loginBAnner.png" 
+                alt="Dashboard Preview" 
+                style={{ 
+                  width: '100%', 
+                  borderRadius: '10px',
+                  marginBottom: '20px'
+                }} 
+              />
             </div>
+            
+            <h1 style={{ 
+              fontSize: '24px', 
+              fontWeight: '200',
+              marginBottom: '15px',
+              marginTop: '15px'
+            }}>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+            </h1>
+            
+            <p style={{ 
+              fontSize: '14px',
+              opacity: 0.9,
+              lineHeight: '1.6'
+            }}>
+              tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+            </p>
           </div>
+        </div>
 
 
           <div style={{
